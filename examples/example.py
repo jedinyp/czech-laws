@@ -1,6 +1,6 @@
-from module.references import fetch_refs
-from module.collections import fetch_collection
-from module.details import fetch_details
+from czech_laws.references import fetch_refs
+from czech_laws.collections import fetch_collection
+from czech_laws.details import fetch_details
 
 # Example usage 
 if __name__ == "__main__":
