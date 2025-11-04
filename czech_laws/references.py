@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 import pandas as pd
 from .config import Config
@@ -27,9 +28,14 @@ def fetch_refs(output_dir: str = Config.output_dir, to_csv: bool = False) -> dic
         "klicKonceptuCzechVoc": 196567, # Arbitrary working id
         "pocet": 1
     }
-
-    response = requests.post(url, headers=headers, json=payload)
-    data = response.json()
+    
+    # Fetch data and retry on error
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        data = response.json()
+    except:
+        time.sleep(10)
+        return fetch_refs(output_dir, to_csv)
 
     # Extract reference tables
     collections = data.get("fazetovyFiltr", {}).get("sbirka", [])
