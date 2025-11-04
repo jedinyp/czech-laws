@@ -32,6 +32,12 @@ def fetch_collection(id: int, output_dir: str = Config.output_dir, to_csv: bool 
 
     # Convert to DataFrame
     df = pd.DataFrame(data.get("seznam", []))
+
+    # Avoid failure and log warning if no docs found
+    if df.empty:
+        print(f"[Warning] No documents found for code {id}.")
+        return df
+    
     df["freshUrl"] = df["staleUrl"].apply(lambda x: f"https://www.e-sbirka.cz{x}")
     
     # Optionally save to CSV
