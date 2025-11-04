@@ -1,6 +1,7 @@
 from czech_laws.references import fetch_refs
 from czech_laws.collections import fetch_collection
 from czech_laws.details import fetch_details
+from czech_laws.context import fetch_context
 from sqlalchemy import create_engine, inspect, text
 import pandas as pd
 import json
@@ -109,4 +110,16 @@ if __name__ == "__main__":
                 citations_df = snake_to_camel(citations_df)
                 citations_df.to_sql("citations", engine, if_exists="append", index=False)
 
+            # Fetch context and push to SQL
+            context_df = fetch_context(doc["staleUrl"])
+            if isinstance(context_df, pd.DataFrame) and not context_df.empty:
+                context_df = serialize_non_primitives(context_df)
+                add_missing_columns(context_df, "context")
+                context_df["parentStaleUrl"] = doc["staleUrl"]
+                context_df["timestamp"] = pd.Timestamp.now().isoformat()
+                context_df = snake_to_camel(context_df)
+                context_df.to_sql("context", engine, if_exists="append", index=False)               
+
         print("All data successfully pushed to SQL database.")
+
+# TODO - create dspace scraper https://dspace.cuni.cz/handle/20.500.11956/1938 (use with VPN to avoid expulsion)
