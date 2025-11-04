@@ -64,18 +64,18 @@ def fetch_refs(output_dir: str = Config.output_dir, to_csv: bool = False) -> dic
         return result
 
     # Convert to DataFrame
-    collections_df = pd.DataFrame(recursive_parse(collections))
+    categories_df = pd.DataFrame(recursive_parse(collections))
     types_df = pd.DataFrame(recursive_parse(types))
     catalogue_df = pd.DataFrame(recursive_parse(catalogue))
 
     # Optionally save to CSV
     if to_csv:
-        collections_df.to_csv(os.path.join(output_dir, "collections.csv"), index=False)
+        categories_df.to_csv(os.path.join(output_dir, "collections.csv"), index=False)
         types_df.to_csv(os.path.join(output_dir, "types.csv"), index=False)
         catalogue_df.to_csv(os.path.join(output_dir, "catalogue.csv"), index=False)
 
     return {
-        "collections": collections_df,
+        "categories": categories_df,
         "types": types_df,
         "catalogue": catalogue_df
     }
