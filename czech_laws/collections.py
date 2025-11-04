@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import time
 import pandas as pd
 from .config import Config
 
@@ -27,17 +28,21 @@ def fetch_collection(id: int, output_dir: str = Config.output_dir, to_csv: bool 
         "klicKonceptuCzechVoc": id,
         "pocet": limit
     }
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
-    data = response.json()
+
+    # Fetch data and retry on error
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        data = response.json()
+    except:
+        time.sleep(10)
+        return fetch_collection(id, output_dir, to_csv, limit)
 
     # Convert to DataFrame
     df = pd.DataFrame(data.get("seznam", []))
-
-    # Avoid failure and log warning if no docs found
     if df.empty:
         print(f"[Warning] No documents found for code {id}.")
         return df
-    
+
     df["freshUrl"] = df["staleUrl"].apply(lambda x: f"https://www.e-sbirka.cz{x}")
     
     # Optionally save to CSV
