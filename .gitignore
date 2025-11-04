@@ -1,0 +1,21 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.so
+*.egg
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*~
