@@ -1,5 +1,6 @@
 import re
 import os
+import time
 import requests
 import pandas as pd
 from .config import Config
@@ -20,22 +21,35 @@ def fetch_details(stale_url: str, output_dir: str = Config.output_dir, to_csv: b
     stale_url = stale_url.replace("/", "%2F")
     url = f"https://www.e-sbirka.cz/sbr-cache/dokumenty-sbirky/{stale_url}"
 
-    # Prepare main df
-    response = requests.get(url)
-    general_df = pd.DataFrame([response.json()])
+    # Fetch data and retry on error
+    try:
+        response = requests.get(url)
+        general_df = pd.DataFrame([response.json()])
+    except:
+        time.sleep(10)
+        return fetch_details(stale_url, output_dir, to_csv)
 
-    # Fetch fragments
-    response = requests.get(url + "/fragmenty?cisloStranky=0")
-    data = response.json()
+    # Fetch fragments and retry on error
+    try:
+        response = requests.get(url + "/fragmenty?cisloStranky=0")
+        data = response.json()
+    except:
+        time.sleep(10)
+        return fetch_details(stale_url, output_dir, to_csv)
+
     pages = int(data.get("pocetStranek"))
     pages_data = [data.get("seznam")]
 
-    # Fetch other pages
+    # Fetch other pages and retry on error
     if pages is not None and pages > 1:
         for page_number in range(1, pages - 1):
-            response = requests.get(url + f"/fragmenty?cisloStranky={page_number}")
-            pages_data.append(response.json().get("seznam"))
-
+            try:
+                response = requests.get(url + f"/fragmenty?cisloStranky={page_number}")
+                pages_data.append(response.json().get("seznam"))
+            except:
+                time.sleep(10)
+                return fetch_details(stale_url, output_dir, to_csv)
+            
     # Prepare citations DataFrame
     pages_data = [{"partialCitation": row.get("zkracenaCitace"),
                    "fullCitation": row.get("uplnaCitace"),
